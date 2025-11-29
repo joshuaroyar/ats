@@ -1,0 +1,2 @@
+model/skill_embeddings.json filter=lfs diff=lfs merge=lfs -text
+model/utils/esco/skill_embeddings.json filter=lfs diff=lfs merge=lfs -text
