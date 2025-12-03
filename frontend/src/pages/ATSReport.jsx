@@ -1,96 +1,128 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+
+const Icons = {
+    ChevronLeft: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>,
+    Score: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>,
+    Feedback: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+};
 
 const ATSReport = () => {
-    const score = 92;
-    const improvementAreas = [
-        "Add measurable achievements to experience",
-        "Use more industry-focused keywords",
-        "Optimize resume formatting for ATS scanning",
-        "Expand skill section with hard skills",
-    ];
-
-    const [pdf, setPdf] = useState()
-
-    const radius = 80;
-    const semiLength = Math.PI * radius;
-    const dashOffset = semiLength * (1 - score / 100);
+    const navigate = useNavigate();
+    const location = useLocation();
+    const [pdfUrl, setPdfUrl] = useState(null);
+    const atsData = location.state?.atsData;
 
     useEffect(() => {
-        const pdfURL = sessionStorage.getItem("pdfURL");
-        setPdf(pdfURL);
+        const storedUrl = sessionStorage.getItem("pdfURL");
+        if (storedUrl) setPdfUrl(storedUrl);
     }, []);
 
+    if (!atsData || !pdfUrl) {
+        return (
+            <div className="h-full w-full flex flex-col items-center justify-center bg-slate-50 space-y-4">
+                <p className="text-xl text-slate-600 font-medium">No report data found.</p>
+                <button 
+                    onClick={() => navigate('/ats-score')} 
+                    className="flex items-center gap-2 bg-gradient-to-r from-slate-800 to-slate-900 text-white px-6 py-3 rounded-xl font-bold hover:shadow-lg transition-all"
+                >
+                    <Icons.ChevronLeft /> Upload a Resume
+                </button>
+            </div>
+        );
+    }
+
+    const ScoreItem = ({ label, value, max }) => {
+        const percentage = (value / max) * 100;
+        let barColor = percentage > 75 ? "bg-green-500" : percentage > 40 ? "bg-yellow-500" : "bg-red-500";
+        return (
+            <div className="mb-5">
+                <div className="flex justify-between mb-2">
+                    <span className="text-sm font-bold text-slate-700">{label}</span>
+                    <span className="text-sm font-bold text-slate-900">{value} <span className="text-slate-400 font-normal">/ {max}</span></span>
+                </div>
+                <div className="w-full bg-slate-100 rounded-full h-2.5">
+                    <div className={`${barColor} h-2.5 rounded-full transition-all duration-1000 ease-out shadow-sm`} style={{ width: `${percentage}%` }}></div>
+                </div>
+            </div>
+        );
+    };
 
     return (
-        <div className="w-full min-h-screen bg-[#ebe3cc] flex items-center justify-center py-12">
-            <div className="bg-white w-[650px] p-10 rounded-xl shadow-xl">
-
-                <h2 className="text-4xl font-black mb-2 text-center">
-                    Your Resume Score
-                </h2>
-                <p className="text-gray-600 text-center mb-10">
-                    Here’s your ATS compatibility result & suggestions to improve.
-                </p>
-
-                <div className="flex flex-col items-center mb-10">
-                    <svg className="w-48 h-32" viewBox="0 0 180 100">
-                        <path
-                            d="M10 90 A80 80 0 0 1 170 90"
-                            stroke="#ddd"
-                            strokeWidth="16"
-                            fill="none"
-                        />
-
-                        <path
-                            d="M10 90 A80 80 0 0 1 170 90"
-                            stroke="#16a34a"
-                            strokeWidth="16"
-                            fill="none"
-                            strokeDasharray={semiLength}
-                            strokeDashoffset={dashOffset}
-                            strokeLinecap="round"
-                        />
-
-                    </svg>
-                    <p className="mt-3 text-3xl font-bold">
-                        {score}
-                        <span className="text-lg text-gray-600">/100</span>
-                    </p>
+        <div className="flex flex-col lg:flex-row h-full w-full bg-slate-50 overflow-hidden font-sans">
+            
+            {/* === LEFT SIDE: PDF PREVIEW === */}
+            <div className="w-full lg:w-1/2 h-full bg-slate-200/50 p-4 lg:p-6 flex flex-col border-r border-slate-200">
+                <div className="flex items-center justify-between mb-4">
+                    <button 
+                        onClick={() => navigate('/ats-score')} 
+                        className="flex items-center gap-2 text-slate-600 hover:text-slate-900 font-medium transition-colors bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-200"
+                    >
+                        <Icons.ChevronLeft /> Back to Upload
+                    </button>
+                    <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wide">Resume Preview</h2>
                 </div>
+                <div className="flex-1 bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-300 relative">
+                    <iframe src={pdfUrl} title="Resume PDF" className="w-full h-full" />
+                </div>
+            </div>
 
-                <h3 className="text-lg font-semibold text-gray-800 mb-3 uppercase">
-                    Suggestions for Improvement
-                </h3>
+            {/* RIGHT SIDE: ATS REPORT DATA */}
+            <div className="w-full lg:w-1/2 h-full overflow-y-auto p-6 lg:p-10 bg-white">
+                <div className="max-w-2xl mx-auto animate-in slide-in-from-right-8 duration-700">
+                    
+                    {/* Final Score Header */}
+                    <div className="text-center mb-10">
+                        <h1 className="text-3xl font-black text-slate-900 mb-6">ATS Analysis Report</h1>
+                        
+                        {/* Unified Brand Gradient Circle */}
+                        <div className="inline-flex flex-col items-center justify-center bg-gradient-to-br from-white to-blue-50 rounded-full w-48 h-48 border-4 border-white shadow-2xl ring-4 ring-blue-50 relative overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-600/5" />
+                            <span className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-br from-blue-600 to-indigo-600 tracking-tight relative z-10">
+                                {atsData.final_ats_score}
+                            </span>
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1 relative z-10">Final Score</span>
+                        </div>
+                    </div>
 
-                <ul className="mb-6 space-y-2">
-                    {improvementAreas.map((point, i) => (
-                        <li key={i} className="text-gray-700 flex items-center gap-2">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                strokeWidth="2"
-                                stroke="green"
-                                className="w-5 h-5"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                />
-                            </svg>
+                    {/* Detailed Scores Section */}
+                    <div className="bg-white rounded-3xl p-8 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 mb-8">
+                        <div className="flex items-center gap-4 mb-8 pb-4 border-b border-slate-50">
+                            <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl">
+                                <Icons.Score />
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-bold text-slate-900">Score Breakdown</h2>
+                                <p className="text-xs text-slate-500">Analysis across key metrics</p>
+                            </div>
+                        </div>
+                        
+                        <ScoreItem label="Impact Score" value={atsData.impact_score} max={10} />
+                        <ScoreItem label="Structure Score" value={atsData.structure_score} max={20} />
+                        <ScoreItem label="Clarity Score" value={atsData.clarity_score} max={5} />
+                        <ScoreItem label="Skill Score" value={atsData.skill_score} max={30} />
+                    </div>
 
-                            {point}
-                        </li>
-                    ))}
-                </ul>
+                    {/* Feedback Section */}
+                    <div className="bg-white rounded-3xl p-8 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100">
+                        <div className="flex items-center gap-4 mb-6">
+                             <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
+                                <Icons.Feedback />
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-bold text-slate-900">AI Feedback</h2>
+                                <p className="text-xs text-slate-500">Actionable improvements</p>
+                            </div>
+                        </div>
+                        <div className="bg-slate-50 p-6 rounded-2xl text-slate-700 whitespace-pre-line border border-slate-100 font-medium leading-relaxed text-sm">
+                            {atsData.feedback}
+                        </div>
+                    </div>
 
-                <button className="w-full mt-10 bg-black hover:bg-gray-900 text-white py-3 rounded-lg cursor-pointer text-lg font-medium transition">
-                    Upload Another Resume
-                </button>
+                </div>
             </div>
         </div>
     );
-}
+};
 
 export default ATSReport;

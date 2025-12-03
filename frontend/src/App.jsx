@@ -1,19 +1,21 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import React from 'react'
-import './App.css';
-import ATS from './pages/ATS';
-import ATSReport from './pages/ATSReport';
+import React, { useEffect } from "react";
+import { Route, Routes } from "react-router-dom";
+import ATS from "./pages/ATS"; 
+import ATSReport from "./pages/ATSReport";
 
-function App() {
-
+const App = () => {
   return (
-    <BrowserRouter>
-    <Routes>
-      <Route path='/ats-score' element={<ATS/>}/>
-      <Route path='/ats-score/report' element={<ATSReport/>}/>
-    </Routes>
-    </BrowserRouter>
-  )
-}
+    <>
+      <Routes>
+        
+        {/* ATS Routes */}
+        <Route path="/" element={<ATS />} />
+        <Route path="/ats-score" element={<ATS />} />
+        <Route path="/ats-score/report" element={<ATSReport />} />
 
-export default App
+      </Routes>
+    </>
+  );
+};
+
+export default App;
