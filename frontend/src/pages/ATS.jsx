@@ -17,7 +17,7 @@ const ATS = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const inputRef = useRef(null);
   const MAX_SIZE = 5;
-  const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000';
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 
   const handleFile = async (file) => {
@@ -33,9 +33,7 @@ const ATS = () => {
         const fileURL = URL.createObjectURL(file);
         sessionStorage.setItem("pdfURL", fileURL);
 
-        // Simulate API Processing
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
+        //ADD BACKEND URL
         const res = await axios.post(BACKEND_URL, file);
         const data = await res.data();
 
@@ -48,7 +46,7 @@ const ATS = () => {
             "feedback": "No output\nMissing skills unknown\nTry again"
         };
 
-        //Add api call data
+        //Pass data
         navigate("/ats-score/report", { state: { atsData: simulatedATSData } });
 
     } catch (e) {
