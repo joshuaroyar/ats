@@ -24,7 +24,7 @@ const ATSReport = () => {
                 <p className="text-xl text-slate-600 font-medium">No report data found.</p>
                 <button 
                     onClick={() => navigate('/ats-score')} 
-                    className="flex items-center gap-2 bg-gradient-to-r from-slate-800 to-slate-900 text-white px-6 py-3 rounded-xl font-bold hover:shadow-lg transition-all"
+                    className="flex items-center gap-2 bg-gradient-to-r from-slate-800 to-slate-900 text-white px-6 py-3 rounded-xl font-bold hover:shadow-lg transition-all cursor-pointer"
                 >
                     <Icons.ChevronLeft /> Upload a Resume
                 </button>

@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 // Icons
 const Icons = {
@@ -16,6 +17,8 @@ const ATS = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const inputRef = useRef(null);
   const MAX_SIZE = 5;
+  const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000';
+
 
   const handleFile = async (file) => {
     if (!file) return;
@@ -33,6 +36,9 @@ const ATS = () => {
         // Simulate API Processing
         await new Promise(resolve => setTimeout(resolve, 2000));
 
+        const res = await axios.post(BACKEND_URL, file);
+        const data = await res.data();
+
         const simulatedATSData = {
             "impact_score": 7.29,
             "structure_score": 20,
@@ -42,6 +48,7 @@ const ATS = () => {
             "feedback": "No output\nMissing skills unknown\nTry again"
         };
 
+        //Add api call data
         navigate("/ats-score/report", { state: { atsData: simulatedATSData } });
 
     } catch (e) {
@@ -114,7 +121,7 @@ const ATS = () => {
                         <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider mt-1 inline-block">Max 5MB</span>
                       </p>
 
-                      <button className="bg-gradient-to-r from-slate-800 to-slate-900 text-white px-8 py-3 rounded-xl font-semibold text-sm shadow-lg hover:shadow-slate-900/20 hover:-translate-y-0.5 transition-all">
+                      <button className="bg-gradient-to-r from-slate-800 to-slate-900 text-white px-8 py-3 rounded-xl font-semibold text-sm shadow-lg hover:shadow-slate-900/20 hover:-translate-y-0.5 transition-all cursor-pointer">
                         Select File
                       </button>
                     </>
