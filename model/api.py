@@ -1,10 +1,11 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 import tempfile
 import os
 from ats_score import ats_score
 from core.scoring.feedback_engine import generate_feedback
 from utils.pdf_reader import extract_text_from_pdf
+from typing import Optional
 
 app = FastAPI(title="ATS Resume Analyzer API", version="1.0.0")
 
@@ -22,7 +23,12 @@ with open("jd.txt", "r", encoding="utf-8") as f:
     JD_TEXT = f.read()
 
 @app.post("/analyze")
-async def analyze_resume(file: UploadFile = File(...)):
+async def analyze_resume(
+    file: UploadFile = File(...),
+    jd_text: Optional[str] = Form(None),
+    jd_file: Optional[UploadFile] = File(None),
+    include_feedback: bool = Form(False),
+):
     """
     Analyze a resume PDF and return ATS scores and feedback.
     """
@@ -48,9 +54,21 @@ async def analyze_resume(file: UploadFile = File(...)):
         if not resume_text.strip():
             raise HTTPException(status_code=400, detail="Could not extract text from PDF. The file may be scanned, image-based, or corrupted.")
 
+        # Determine JD text source: form field, uploaded text file, or default jd.txt
+        if jd_text and jd_text.strip():
+            jd_source_text = jd_text
+        elif jd_file is not None:
+            try:
+                raw = await jd_file.read()
+                jd_source_text = raw.decode('utf-8')
+            except Exception:
+                jd_source_text = JD_TEXT
+        else:
+            jd_source_text = JD_TEXT
+
         # Save JD text to temporary file for advanced_score function
         with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as jd_temp_file:
-            jd_temp_file.write(JD_TEXT)
+            jd_temp_file.write(jd_source_text)
             jd_temp_file_path = jd_temp_file.name
 
         try:
@@ -61,21 +79,24 @@ async def analyze_resume(file: UploadFile = File(...)):
             if os.path.exists(jd_temp_file_path):
                 os.unlink(jd_temp_file_path)
 
-        # Generate AI feedback
-        try:
-            feedback = generate_feedback(
-                resume_text,
-                JD_TEXT,
-                {
-                    "impact": result["impact_score"],
-                    "structure": result["structure_score"],
-                    "clarity": result["clarity_score"],
-                    "skills": result["skill_score"]
-                }
-            )
-        except Exception as feedback_error:
-            print(f"Feedback generation failed: {feedback_error}")
-            feedback = "AI feedback unavailable\nAnalysis completed successfully\nManual review recommended"
+        # Generate AI feedback only if explicitly requested by the client
+        if include_feedback:
+            try:
+                feedback = generate_feedback(
+                    resume_text,
+                    jd_source_text,
+                    {
+                        "impact": result["impact_score"],
+                        "structure": result["structure_score"],
+                        "clarity": result["clarity_score"],
+                        "skills": result["skill_score"]
+                    }
+                )
+            except Exception as feedback_error:
+                print(f"Feedback generation failed: {feedback_error}")
+                feedback = "AI feedback unavailable\nAnalysis completed successfully\nManual review recommended"
+        else:
+            feedback = ""
 
         result["feedback"] = feedback
 

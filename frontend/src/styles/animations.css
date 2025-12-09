@@ -1,0 +1,19 @@
+/* Animations and utility classes for the frontend UI */
+
+/* Gradient background used by some decorative elements */
+.animated-gradient {
+    background: linear-gradient(90deg, #eef2ff 0%, #fce7f3 50%, #eef2ff 100%);
+    background-size: 200% 200%;
+}
+
+/* Simple delay utility for animations */
+.animation-delay-2000 {
+    animation-delay: 2s !important;
+}
+
+/* Liquid glass utility */
+.liquid-card {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(8px);
+}

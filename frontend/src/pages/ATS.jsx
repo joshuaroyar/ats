@@ -15,7 +15,11 @@ const ATS = () => {
   const [fileInfo, setFileInfo] = useState(null);
   const [error, setError] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [jdText, setJdText] = useState("");
+  const [jdFileName, setJdFileName] = useState("");
+  const [jdFile, setJdFile] = useState(null);
   const inputRef = useRef(null);
+  const jdFileRef = useRef(null);
   const MAX_SIZE = 5;
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -35,6 +39,14 @@ const ATS = () => {
 
       const formData = new FormData();
       formData.append("file", file);
+      // Attach JD text or JD file if provided
+      if (jdText && jdText.trim()) {
+        formData.append("jd_text", jdText);
+      } else if (jdFile) {
+        formData.append("jd_file", jdFile, jdFile.name);
+      }
+      // Do not request AI feedback by default from backend
+      formData.append("include_feedback", "false");
 
       // Make the API call
       const res = await axios.post(BACKEND_URL, formData, {
@@ -63,32 +75,48 @@ const ATS = () => {
       </div>
 
       <div className="w-full max-w-6xl p-6 md:p-10 flex flex-col justify-center min-h-[600px]">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-
-          {/* Left Column */}
-          <div className="flex flex-col justify-center gap-6">
-            <div>
-              <h1 className="text-3xl md:text-5xl font-bold text-slate-900 tracking-tight leading-tight">
+        <div className="flex w-full justify-center">
+          <div className="w-full max-w-2xl space-y-6">
+            <div className="text-center relative">
+              {/* animated gradient background accents */}
+              <div aria-hidden className="pointer-events-none absolute -top-20 -left-20 w-72 h-72 rounded-full opacity-30 blur-3xl transform-gpu animate-blob" />
+              <div aria-hidden className="pointer-events-none absolute -bottom-16 -right-16 w-80 h-80 rounded-full opacity-30 blur-3xl transform-gpu animate-blob animation-delay-2000" />
+              {/* animations moved to global CSS (frontend/src/index.css) */}
+              <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight leading-tight">
                 Is your resume <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
-                  ATS Ready?
-                </span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">ATS Ready?</span>
               </h1>
-              <p className="mt-4 text-base md:text-lg text-slate-600 leading-relaxed max-w-lg">
-                Stop guessing. Get an AI-powered score and actionable fixes to land your dream job.
-              </p>
+              <p className="mt-3 text-sm text-slate-600">Upload a resume and optionally provide a job description to evaluate against.</p>
+            </div>
+
+            {/* Job Description Card */}
+            <div className="bg-white/20 backdrop-blur-md rounded-3xl p-6 w-full shadow-lg border border-white/10 transition-transform transform hover:-translate-y-1 hover:scale-[1.01] will-change-transform">
+              <div className="absolute inset-0 rounded-3xl animated-gradient animate-gradientShift opacity-10 pointer-events-none -z-10" />
+              <h3 className="text-lg font-bold text-slate-900 mb-2">Job Description</h3>
+              <p className="text-sm text-slate-600 mb-4">Paste the job description below or upload a .txt file.</p>
+              <textarea
+                value={jdText}
+                onChange={(e) => { setJdText(e.target.value); if (e.target.value) { setJdFileName(''); setJdFile(null); } }}
+                placeholder="Paste job description here..."
+                className="w-full min-h-[120px] p-3 rounded-xl border border-white/20 mb-3 text-sm bg-white/10 placeholder:text-slate-400 text-slate-900 transition-shadow focus:shadow-lg focus:outline-none"
+              />
+              <div className="flex items-center gap-3">
+                <input ref={jdFileRef} type="file" accept=".txt,text/plain" className="hidden" onChange={(e) => {
+                  const f = e.target.files[0];
+                  if (f) { setJdFileName(f.name); setJdFile(f); setJdText(''); }
+                }} />
+                <button type="button" className="px-4 py-2 bg-white/10 text-slate-900 rounded-lg text-sm backdrop-blur-sm border border-white/10 hover:scale-[1.02] transition-transform shadow-sm" onClick={() => jdFileRef.current && jdFileRef.current.click()}>
+                  Upload JD (.txt)
+                </button>
+                <span className="text-sm text-slate-600">{jdFileName || 'No file selected'}</span>
+              </div>
             </div>
 
             {/* Upload Card */}
-            <div
-              className={`bg-white/80 backdrop-blur-xl border-2 border-dashed rounded-3xl p-6 w-full relative transition-all duration-300 shadow-sm
-                ${dragActive ? 'border-blue-500 bg-blue-50/50' : 'border-slate-300 hover:border-blue-400 hover:shadow-md'}`}
-              onDragOver={(e) => { e.preventDefault(); setDragActive(true) }}
-              onDragLeave={() => setDragActive(false)}
-              onDrop={(e) => { e.preventDefault(); setDragActive(false); if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]) }}
-            >
+            <div className={`relative overflow-hidden rounded-3xl p-6 w-full transition-shadow duration-300 ${dragActive ? 'ring-2 ring-blue-400/60' : 'ring-1 ring-white/5'}`} onDragOver={(e) => { e.preventDefault(); setDragActive(true) }} onDragLeave={() => setDragActive(false)} onDrop={(e) => { e.preventDefault(); setDragActive(false); if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]) }}>
 
-              <div className="flex flex-col items-center justify-center text-center cursor-pointer p-6" onClick={() => !fileInfo && !isAnalyzing && inputRef.current.click()}>
+              <div className="absolute inset-0 animated-gradient animate-gradientShift opacity-6 -z-10" />
+              <div className="bg-white/10 backdrop-blur-md border border-white/8 rounded-3xl p-6 flex flex-col items-center text-center">
                 <input ref={inputRef} type="file" accept="application/pdf" onChange={(e) => handleFile(e.target.files[0])} className="hidden" disabled={isAnalyzing} />
 
                 {fileInfo ? (
@@ -96,47 +124,37 @@ const ATS = () => {
                     <div className="w-14 h-14 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-3 shadow-sm">
                       <Icons.CheckCircle />
                     </div>
-                    <h3 className="text-base font-bold text-slate-800">{fileInfo.name}</h3>
+                    <h3 className="text-base font-bold text-slate-900">{fileInfo.name}</h3>
                     {isAnalyzing ? (
-                      <div className="flex items-center gap-2 text-blue-600 text-sm font-medium animate-pulse mt-3">
-                        <span className="w-2 h-2 bg-blue-600 rounded-full animate-ping"></span>
+                      <div className="flex items-center gap-2 text-blue-200 text-sm font-medium animate-pulse mt-3">
+                        <span className="w-2 h-2 bg-blue-200 rounded-full animate-ping"></span>
                         Analyzing...
                       </div>
                     ) : (
-                      <p className="text-slate-500 text-sm mt-2">Redirecting...</p>
+                      <p className="text-slate-300 text-sm mt-2">Redirecting...</p>
                     )}
                   </div>
                 ) : (
                   <>
-                    <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-4 shadow-sm group-hover:scale-110 transition-transform">
+                    <div className="w-16 h-16 bg-white/10 text-slate-900 rounded-full flex items-center justify-center mb-4 shadow-md transform transition-transform hover:scale-105">
                       <Icons.Upload />
                     </div>
-                    <h3 className="text-xl font-bold text-slate-800 mb-2">Upload Resume</h3>
-                    <p className="text-slate-500 mb-6 text-sm">
-                      Drag & drop PDF <br />
-                      <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider mt-1 inline-block">Max 5MB</span>
-                    </p>
+                    <h3 className="text-xl font-bold text-slate-900 mb-2">Upload Resume</h3>
+                    <p className="text-slate-600 mb-6 text-sm">Drag & drop PDF or click to select<br /><span className="text-[10px] text-slate-500 font-medium uppercase tracking-wider mt-1 inline-block">Max 5MB</span></p>
 
-                    <button className="bg-gradient-to-r from-slate-800 to-slate-900 text-white px-8 py-3 rounded-xl font-semibold text-sm shadow-lg hover:shadow-slate-900/20 hover:-translate-y-0.5 transition-all cursor-pointer">
-                      Select File
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <button onClick={() => inputRef.current && inputRef.current.click()} className="bg-white/90 text-slate-900 px-6 py-2 rounded-xl font-semibold text-sm shadow-md hover:translate-y-[-1px] transition-transform">Select File</button>
+                      <button onClick={() => { setJdText(''); setJdFile(null); setJdFileName(''); }} className="px-4 py-2 bg-white/10 text-slate-800 rounded-md text-sm">Clear JD</button>
+                    </div>
                   </>
                 )}
               </div>
+
               {error && (
                 <div className="mt-4 p-3 bg-red-50 border border-red-100 rounded-xl flex items-center gap-3 text-red-600 text-sm font-medium animate-in slide-in-from-top-2">
                   <Icons.AlertCircle />{error}
                 </div>
               )}
-            </div>
-          </div>
-
-          {/* Right Column - Image */}
-          <div className="hidden lg:flex flex-col items-center justify-center relative h-[500px]">
-            <div className="absolute inset-0 bg-gradient-to-tr from-blue-100 to-indigo-100 rounded-[3rem] rotate-3 scale-95 -z-10" />
-            <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl border-4 border-white overflow-hidden flex items-center justify-center h-full relative">
-              <img src="/resume-checker.webp" alt="Preview" className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
-              <span className="text-slate-300 font-medium absolute z-0 pointer-events-none">Preview Image</span>
             </div>
           </div>
         </div>
