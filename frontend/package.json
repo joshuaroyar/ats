@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.1.0",
+    "@tailwindcss/vite": "^4.1.17",
     "axios": "^1.6.5",
     "framer-motion": "^11.0.3",
     "lucide-react": "^0.320.0",
@@ -17,10 +18,10 @@
     "react-dom": "^18.2.0",
     "react-helmet-async": "^2.0.4",
     "react-hot-toast": "^2.4.1",
+    "react-pdftotext": "latest",
     "react-redux": "^9.1.0",
     "react-router-dom": "^6.21.3",
-    "tailwindcss": "^3.4.1",
-    "react-pdftotext": "latest" 
+    "tailwindcss": "^4.1.17"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",
@@ -28,6 +29,6 @@
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.17",
     "postcss": "^8.4.33",
-    "vite": "^5.0.8"
+    "vite": "^7.2.7"
   }
 }

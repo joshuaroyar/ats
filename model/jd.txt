@@ -1,0 +1,68 @@
+Job Description – Software Engineer (AI, Full-Stack, Cloud)
+
+Position: Software Engineer
+Location: Mangalore / Remote
+Type: Full-time
+
+About the Role
+
+We are seeking a highly analytical Software Engineer with strong foundations in Data Structures & Algorithms, a passion for AI, Cloud technologies, and hands-on experience in full-stack web development. The ideal candidate is a competitive coder with proven leadership in technical teams and a demonstrated track record in building scalable, user-focused products.
+
+Key Responsibilities
+Software Development & Architecture
+
+Design, develop, and deploy scalable web applications using React.js, Node.js, Express.js, and MongoDB.
+
+Build intelligent features leveraging AI-based components, chatbot integrations, and automation workflows.
+
+Architect end-to-end technical solutions, ensuring high system performance and reliability.
+
+Cloud & Infrastructure
+
+Work with Google Cloud services to deploy, optimize, and monitor modern web applications.
+
+Implement best practices in CI/CD, containerization, and cloud-based system performance tuning.
+
+Algorithmic Problem Solving
+
+Apply strong algorithmic, mathematical, and data structure skills to optimize systems.
+
+Participate in competitive coding and contribute to problem-solving discussions.
+
+Leadership & Collaboration
+
+Lead and mentor engineering teams (5–15 members), driving project planning, code reviews, and technical decision-making.
+
+Conduct technical workshops, knowledge-sharing sessions, and contribute to open-source initiatives.
+
+Project Management
+
+Oversee full project lifecycles—from conceptualisation and architecture to deployment and maintenance.
+
+Ensure projects are delivered on time with improved performance benchmarks.
+
+Required Skills
+
+Programming: C, C++, JavaScript
+
+Web Technologies: React.js, Node.js, Express.js, MongoDB
+
+Cloud: Google Cloud Platform
+
+Databases: SQL, MongoDB
+
+Strong understanding of DSA (150+ problems solved)
+
+Version control using Git & GitHub
+
+Excellent problem-solving, analytical thinking, and debugging skills
+
+Strong communication, leadership, and teamwork abilities
+
+Preferred Qualifications
+
+Bachelor’s degree in Information Science, Computer Science, or related engineering discipline (2026 completion).
+
+Experience leading technical teams, student communities, or startup initiatives.
+
+Participation in national-level hackathons or competitive programming platforms.

@@ -1,0 +1,12 @@
+networkx
+nltk
+numpy
+pdfminer
+pdfplumber
+sentence-transformers
+spacy
+torch
+tqdm
+fastapi
+uvicorn
+python-multipart
