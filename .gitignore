@@ -1,0 +1,28 @@
+# Ignore Python virtual environments
+model/.venv/
+venv/
+ENV/
+.venv/
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Environment variables
+.env
+
+# Node
+node_modules/
+frontend/dist/
+
+# IDEs and editors
+.vscode/
+.idea/
+
+# macOS
+.DS_Store
+
+# Distribution / packaging
+*.egg-info/
+dist/
+build/
