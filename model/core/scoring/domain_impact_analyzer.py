@@ -186,7 +186,8 @@ def analyze_text_impact(text, verbs_banks, nouns_banks, domain=None):
 
     # final normalization: scale raw (which should be within reasonable bound) to 0..25
     # avoid hard clipping by using a logistic-like squeeze if raw is slightly > max
-    max_possible = CAP_VERB + CAP_METRIC + CAP_ACHIEVEMENT + WEIGHT_NOUN_DENSITY
+    # Increased max_possible to make it harder to get a perfect score
+    max_possible = (CAP_VERB + CAP_METRIC + CAP_ACHIEVEMENT + WEIGHT_NOUN_DENSITY) * 1.2
     # simple normalization
     impact_score = max(0.0, min(25.0, (raw / max_possible) * 25.0))
 

@@ -45,8 +45,8 @@ const ATS = () => {
       } else if (jdFile) {
         formData.append("jd_file", jdFile, jdFile.name);
       }
-      // Do not request AI feedback by default from backend
-      formData.append("include_feedback", "false");
+      // Request AI feedback from backend
+      formData.append("include_feedback", "true");
 
       // Make the API call
       const res = await axios.post(BACKEND_URL, formData, {

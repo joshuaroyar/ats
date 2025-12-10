@@ -1,11 +1,15 @@
 import json
 import numpy as np
 import torch
+import os
 from sentence_transformers import SentenceTransformer
 from numpy.linalg import norm
 
 # Load embeddings
-with open("skill_embeddings.json", "r", encoding="utf-8") as f:
+base_path = os.path.dirname(os.path.abspath(__file__))
+embeddings_path = os.path.join(base_path, "../../utils/esco/skill_embeddings.json")
+
+with open(embeddings_path, "r", encoding="utf-8") as f:
     SKILL_DB = json.load(f)
 
 # Convert embeddings into arrays for fast math

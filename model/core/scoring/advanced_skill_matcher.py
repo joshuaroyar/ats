@@ -262,6 +262,12 @@ def compute_skill_score(jd_scores, jd_phrases, max_score=SKILL_SCORE_MAX):
     avg_strength = sum(jd_scores[p] for p in matched) / len(matched)
     # Coverage is primary driver (70%), strength secondary (30%)
     raw = 0.7 * coverage + 0.3 * avg_strength
+    
+    # Penalize sparse JDs (fewer than 10 candidates) to avoid easy 100% coverage
+    if len(jd_phrases) < 10:
+        penalty_factor = len(jd_phrases) / 10.0
+        raw *= penalty_factor
+
     return min(max_score, raw * max_score)
 
 # ---- Suggestion generation ----
@@ -275,10 +281,14 @@ def suggest_additions(jd_phrases, jd_scores, resume_phrases):
     return suggestions
 
 # ---- Full pipeline ----
-def advanced_score(resume_pdf, jd_txt, fast=False):
+def advanced_score(resume_pdf, jd_input, fast=False, is_raw_text=False):
     # load texts
     resume_text = extract_resume_text(resume_pdf)
-    jd_text = load_text(jd_txt)
+    
+    if is_raw_text:
+        jd_text = jd_input
+    else:
+        jd_text = load_text(jd_input)
 
     # domain banks (if available)
     domain_verbs = []

@@ -1,5 +1,6 @@
 import json
 import numpy as np
+import os
 from core.ontology.map_to_ontology import map_to_esco
 from utils.extraction.skill_extractor import extract_candidates
 from utils.pdf_reader import extract_text_from_pdf
@@ -10,7 +11,9 @@ def cosine(a, b):
 
 
 def load_embeddings():
-    with open("skill_embeddings.json", "r", encoding="utf-8") as f:
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    embeddings_path = os.path.join(base_path, "../../utils/esco/skill_embeddings.json")
+    with open(embeddings_path, "r", encoding="utf-8") as f:
         db = json.load(f)
     return db
 
@@ -53,6 +56,9 @@ def evaluate_resume_against_jd(resume_pdf, jd_text):
     resume_ids = set([s["esco_id"] for s in resume_skills])
     jd_ids = set([s["esco_id"] for s in jd_skills])
 
+    # Create ID to embedding map
+    id_to_emb = {id: emb for id, emb in zip(esco_ids, emb_matrix)}
+
     # STEP 6: Score calculation
     exact_matches = resume_ids.intersection(jd_ids)
 
@@ -67,20 +73,26 @@ def evaluate_resume_against_jd(resume_pdf, jd_text):
         best_sim = 0
         best_res = None
 
-        jd_emb = np.array(jd_skill["similarity_vector"]) if "similarity_vector" in jd_skill else None
+        jd_id = jd_skill["esco_id"]
+        if jd_id in id_to_emb:
+            jd_emb = id_to_emb[jd_id]
 
-        # compare JD skill with all resume skills
-        for r in resume_skills:
-            sim = r["similarity"]
-            if sim > best_sim:
-                best_sim = sim
-                best_res = r
+            # compare JD skill with all resume skills
+            for r in resume_skills:
+                r_id = r["esco_id"]
+                if r_id in id_to_emb:
+                    r_emb = id_to_emb[r_id]
+                    sim = cosine(jd_emb, r_emb)
+
+                    if sim > best_sim:
+                        best_sim = sim
+                        best_res = r
 
         if best_sim >= 0.70:
             partial_matches.append({
                 "jd_skill": jd_skill["esco_name"],
                 "matched_with": best_res["esco_name"],
-                "similarity": best_sim
+                "similarity": float(best_sim)
             })
         else:
             missing_skills.append(jd_skill["esco_name"])

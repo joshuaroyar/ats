@@ -104,13 +104,31 @@ const ATSReport = () => {
                             </div>
                         </div>
 
-                        <ScoreItem label="Impact Score" value={atsData.impact_score} max={10} />
+                        <ScoreItem label="Impact Score" value={atsData.impact_score} max={25} />
                         <ScoreItem label="Structure Score" value={atsData.structure_score} max={20} />
-                        <ScoreItem label="Clarity Score" value={atsData.clarity_score} max={5} />
-                        <ScoreItem label="Skill Score" value={atsData.skill_score} max={30} />
+                        <ScoreItem label="Clarity Score" value={atsData.clarity_score} max={10} />
+                        <ScoreItem label="Skill Score" value={atsData.skill_score} max={45} />
                     </div>
 
-                    {/* Feedback removed on main frontend (disabled) */}
+                    {/* Feedback Section */}
+                    {atsData.feedback && (
+                        <div className="bg-white rounded-3xl p-8 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 mt-8">
+                            <div className="flex items-center gap-4 mb-6 pb-4 border-b border-slate-50">
+                                <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
+                                    <Icons.Feedback />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-bold text-slate-900">AI Feedback</h2>
+                                    <p className="text-xs text-slate-500">Generated insights & recommendations</p>
+                                </div>
+                            </div>
+                            <div className="prose prose-slate max-w-none">
+                                <div className="bg-slate-50 rounded-2xl p-6 text-slate-700 leading-relaxed whitespace-pre-line border border-slate-100">
+                                    {atsData.feedback}
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                 </div>
             </div>

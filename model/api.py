@@ -18,10 +18,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load the job description (you might want to make this configurable)
-with open("jd.txt", "r", encoding="utf-8") as f:
-    JD_TEXT = f.read()
-
 @app.post("/analyze")
 async def analyze_resume(
     file: UploadFile = File(...),
@@ -54,7 +50,7 @@ async def analyze_resume(
         if not resume_text.strip():
             raise HTTPException(status_code=400, detail="Could not extract text from PDF. The file may be scanned, image-based, or corrupted.")
 
-        # Determine JD text source: form field, uploaded text file, or default jd.txt
+        # Determine JD text source: form field, uploaded text file, or empty
         if jd_text and jd_text.strip():
             jd_source_text = jd_text
         elif jd_file is not None:
@@ -62,22 +58,15 @@ async def analyze_resume(
                 raw = await jd_file.read()
                 jd_source_text = raw.decode('utf-8')
             except Exception:
-                jd_source_text = JD_TEXT
+                jd_source_text = ""
         else:
-            jd_source_text = JD_TEXT
-
-        # Save JD text to temporary file for advanced_score function
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as jd_temp_file:
-            jd_temp_file.write(jd_source_text)
-            jd_temp_file_path = jd_temp_file.name
+            jd_source_text = ""
 
         try:
-            # Run ATS analysis
-            result = ats_score(temp_file_path, jd_temp_file_path)
+            # Run ATS analysis directly with text content
+            result = ats_score(temp_file_path, jd_source_text, is_raw_text=True)
         finally:
-            # Clean up JD temp file
-            if os.path.exists(jd_temp_file_path):
-                os.unlink(jd_temp_file_path)
+            pass # No JD temp file to clean up anymore
 
         # Generate AI feedback only if explicitly requested by the client
         if include_feedback:
