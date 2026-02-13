@@ -15,6 +15,29 @@ if ! command -v npm &> /dev/null; then
     exit 1
 fi
 
+# --- Determine Python Interpreter ---
+if [ -d "$(pwd)/model/venv" ]; then
+    echo "🐍 Using virtual environment: model/venv"
+    PYTHON_EXEC="$(pwd)/model/venv/bin/python"
+elif [ -d "$(pwd)/venv" ]; then
+    # In case venv is at root
+    echo "🐍 Using virtual environment: venv"
+    PYTHON_EXEC="$(pwd)/venv/bin/python"
+else
+    echo "🐍 Using system python (ensure dependencies are installed)"
+    PYTHON_EXEC="python"
+fi
+
+# --- 1.5 Setup spaCy ---
+echo "🧠 Checking spaCy models..."
+# Check if en_core_web_sm is installed, if not download it
+if ! $PYTHON_EXEC -c "import spacy; spacy.load('en_core_web_sm')" &> /dev/null; then
+    echo "📥 Downloading spacy model 'en_core_web_sm'..."
+    $PYTHON_EXEC -m spacy download en_core_web_sm
+else
+    echo "✅ spaCy model 'en_core_web_sm' is ready."
+fi
+
 # --- 2. Setup Ollama (AI Model) ---
 
 if ! command -v ollama &> /dev/null; then
@@ -52,8 +75,9 @@ fi
 
 echo "📡 Starting backend API server..."
 cd model
-# Using python directly. Ensure you are in the correct venv if needed.
-python api.py &
+# Start API using the determined python executable
+# Note: PYTHON_EXEC is absolute path, so it works after cd
+$PYTHON_EXEC api.py &
 BACKEND_PID=$!
 
 # Wait a moment for backend to start

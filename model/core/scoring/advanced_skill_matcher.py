@@ -20,7 +20,6 @@ import json
 import os
 import math
 import argparse
-import torch
 from collections import Counter, defaultdict
 import numpy as np
 
@@ -32,7 +31,6 @@ except Exception as e:
 
 # ---- Config ----
 EMBED_MODEL_NAME = "intfloat/e5-base"
-device = "cuda" if torch.cuda.is_available() else "cpu"
 EMBED_BATCH = 64
 SIM_THRESHOLD = 0.72   # threshold to consider phrase-level semantic match
 CANDIDATE_NGRAM_MAX = 4
@@ -262,12 +260,6 @@ def compute_skill_score(jd_scores, jd_phrases, max_score=SKILL_SCORE_MAX):
     avg_strength = sum(jd_scores[p] for p in matched) / len(matched)
     # Coverage is primary driver (70%), strength secondary (30%)
     raw = 0.7 * coverage + 0.3 * avg_strength
-    
-    # Penalize sparse JDs (fewer than 10 candidates) to avoid easy 100% coverage
-    if len(jd_phrases) < 10:
-        penalty_factor = len(jd_phrases) / 10.0
-        raw *= penalty_factor
-
     return min(max_score, raw * max_score)
 
 # ---- Suggestion generation ----
@@ -281,14 +273,16 @@ def suggest_additions(jd_phrases, jd_scores, resume_phrases):
     return suggestions
 
 # ---- Full pipeline ----
-def advanced_score(resume_pdf, jd_input, fast=False, is_raw_text=False):
+def advanced_score(resume_pdf, jd_input, fast=False):
     # load texts
     resume_text = extract_resume_text(resume_pdf)
     
-    if is_raw_text:
-        jd_text = jd_input
-    else:
+    # Handle both file paths and raw text for JD
+    if os.path.exists(jd_input) and os.path.isfile(jd_input):
         jd_text = load_text(jd_input)
+    else:
+        # Assume input is the raw text (e.g. from API)
+        jd_text = jd_input
 
     # domain banks (if available)
     domain_verbs = []
@@ -318,7 +312,7 @@ def advanced_score(resume_pdf, jd_input, fast=False, is_raw_text=False):
                 jd_cands.insert(0, s)
 
     # initialise embedder
-    model = SentenceTransformer(EMBED_MODEL_NAME, device=device)
+    model = SentenceTransformer(EMBED_MODEL_NAME)
 
     # perform matching
     matched, jd_scores, global_sim = match_skills(model, resume_cands, jd_cands, jd_pos_weights, sim_threshold=SIM_THRESHOLD)

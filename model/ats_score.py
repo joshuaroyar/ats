@@ -28,7 +28,7 @@ from core.scoring.advanced_skill_matcher import advanced_score
 from core.scoring.feedback_engine import generate_feedback
 
 
-def ats_score(resume_pdf, jd_input, is_raw_text=False):
+def ats_score(resume_pdf, jd_txt):
     # Extract text
     text = extract_text_from_pdf(resume_pdf)
 
@@ -36,15 +36,15 @@ def ats_score(resume_pdf, jd_input, is_raw_text=False):
     impact = analyze_resume_impact(resume_pdf)
     structure = analyze_structure(text)
     clarity = analyze_clarity(text)
-    skill_detail = advanced_score(resume_pdf, jd_input, is_raw_text=is_raw_text)
+    skill_detail = advanced_score(resume_pdf, jd_txt)
     skill_score = skill_detail["skill_score"]
 
     # Final ATS Score = sum of all
     final = (
-        impact["impact_score"]
-        + structure["structure_score"]
-        + clarity["clarity_score"]
-        + skill_score
+        impact["impact_score"]*1.45
+        + structure["structure_score"]*1.5
+        + clarity["clarity_score"]*1.3
+        + skill_score*1.5
     )
 
     final = round(max(0, min(100, final)), 2)

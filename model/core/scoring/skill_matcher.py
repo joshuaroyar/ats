@@ -19,7 +19,6 @@ Uses:
 import re
 import json
 import os
-import torch
 from sentence_transformers import SentenceTransformer
 import numpy as np
 
@@ -35,8 +34,7 @@ from utils.pdf_reader import extract_text_from_pdf
 # -------------------------
 # CONFIG
 # -------------------------
-device = "cuda" if torch.cuda.is_available() else "cpu"
-EMBED_MODEL = SentenceTransformer("intfloat/e5-base", device=device)   # fast, accurate
+EMBED_MODEL = SentenceTransformer("intfloat/e5-base")   # fast, accurate
 
 HARD_SKILL_WEIGHT = 0.65
 SOFT_SKILL_WEIGHT = 0.15

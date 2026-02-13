@@ -1,115 +1,83 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException, Form
-from fastapi.middleware.cors import CORSMiddleware
-import tempfile
+import shutil
 import os
-from ats_score import ats_score
-from core.scoring.feedback_engine import generate_feedback
-from utils.pdf_reader import extract_text_from_pdf
+import uvicorn
+import json
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 
-app = FastAPI(title="ATS Resume Analyzer API", version="1.0.0")
+# Import the scoring engine
+# Ensure the model directory is in the python path if running from elsewhere, 
+# although running `python api.py` from model/ should work.
+from core.scoring.scoring_engine import evaluate_resume_against_jd
 
-# Add CORS middleware to allow requests from the frontend
+app = FastAPI(title="ATS API")
+
+# Enable CORS for frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify your frontend URL
+    allow_origins=["*"],  # For development, allow all. adjust for production.
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+@app.get("/health")
+def health():
+    return {"status": "healthy"}
+
 @app.post("/analyze")
-async def analyze_resume(
+def analyze_resume(
     file: UploadFile = File(...),
     jd_text: Optional[str] = Form(None),
     jd_file: Optional[UploadFile] = File(None),
-    include_feedback: bool = Form(False),
+    include_feedback: bool = Form(True)
 ):
-    """
-    Analyze a resume PDF and return ATS scores and feedback.
-    """
-    # Validate file type
-    if not file.filename.lower().endswith('.pdf'):
-        raise HTTPException(status_code=400, detail="Only PDF files are allowed")
-
-    # Validate file size (max 5MB)
-    file_content = await file.read()
-    if len(file_content) > 5 * 1024 * 1024:  # 5MB limit
-        raise HTTPException(status_code=400, detail="File size exceeds 5MB limit")
-
-    # Save uploaded file temporarily
-    with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_file:
-        temp_file.write(file_content)
-        temp_file_path = temp_file.name
-
+    # Log the content type for debugging
+    print(f"Received file: {file.filename}, content_type: {file.content_type}")
+    
+    if file.content_type != "application/pdf" and not file.filename.lower().endswith(".pdf"):
+        raise HTTPException(status_code=400, detail="Only PDF files are allowed for resume.")
+    
+    # Save the uploaded resume temporarily
+    temp_resume_path = f"temp_{file.filename}"
+    with open(temp_resume_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+        
     try:
-        # Extract text first to check if PDF is readable
-        from utils.pdf_reader import extract_text_from_pdf
-        resume_text = extract_text_from_pdf(temp_file_path)
-
-        if not resume_text.strip():
-            raise HTTPException(status_code=400, detail="Could not extract text from PDF. The file may be scanned, image-based, or corrupted.")
-
-        # Determine JD text source: form field, uploaded text file, or empty
+        # Determine JD content
+        final_jd_text = ""
+        
         if jd_text and jd_text.strip():
-            jd_source_text = jd_text
-        elif jd_file is not None:
-            try:
-                raw = await jd_file.read()
-                jd_source_text = raw.decode('utf-8')
-            except Exception:
-                jd_source_text = ""
+            final_jd_text = jd_text
+        elif jd_file:
+             # Process uploaded JD file
+             # Use synchronous read since we are in a def (threadpool)
+             content = jd_file.file.read()
+             final_jd_text = content.decode("utf-8")
         else:
-            jd_source_text = ""
+            # Fallback to default local JD
+            default_jd_path = os.path.join(os.path.dirname(__file__), "jd.txt")
+            if os.path.exists(default_jd_path):
+                with open(default_jd_path, "r", encoding="utf-8") as f:
+                    final_jd_text = f.read()
+            else:
+                final_jd_text = "Software Engineer job description placeholder."
 
-        try:
-            # Run ATS analysis directly with text content
-            result = ats_score(temp_file_path, jd_source_text, is_raw_text=True)
-        finally:
-            pass # No JD temp file to clean up anymore
-
-        # Generate AI feedback only if explicitly requested by the client
-        if include_feedback:
-            try:
-                feedback = generate_feedback(
-                    resume_text,
-                    jd_source_text,
-                    {
-                        "impact": result["impact_score"],
-                        "structure": result["structure_score"],
-                        "clarity": result["clarity_score"],
-                        "skills": result["skill_score"]
-                    }
-                )
-            except Exception as feedback_error:
-                print(f"Feedback generation failed: {feedback_error}")
-                feedback = "AI feedback unavailable\nAnalysis completed successfully\nManual review recommended"
-        else:
-            feedback = ""
-
-        result["feedback"] = feedback
-
+        # Run analysis
+        # Note: evaluate_resume_against_jd typically takes a file path for the resume
+        result = evaluate_resume_against_jd(temp_resume_path, final_jd_text)
+        
         return result
 
-    except HTTPException:
-        raise
     except Exception as e:
-        print(f"Analysis failed with error: {str(e)}")
-        print(f"Error type: {type(e).__name__}")
         import traceback
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
-
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
-        # Clean up temporary file
-        if os.path.exists(temp_file_path):
-            os.unlink(temp_file_path)
-
-@app.get("/health")
-async def health_check():
-    """Health check endpoint"""
-    return {"status": "healthy"}
+        # Cleanup
+        if os.path.exists(temp_resume_path):
+            os.remove(temp_resume_path)
 
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run("api:app", host="0.0.0.0", port=8000, reload=True)

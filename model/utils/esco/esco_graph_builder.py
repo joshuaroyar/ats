@@ -78,9 +78,11 @@ def load_esco_graph(skills_file, hierarchy_file, relations_file):
 
 
 if __name__ == "__main__":
-    skills_csv = "skills_en.csv"
-    hierarchy_csv = "skillsHierarchy_en.csv"
-    relations_csv = "skillSkillRelations_en.csv"
+    import os
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    skills_csv = os.path.join(base_dir, "skills_en.csv")
+    hierarchy_csv = os.path.join(base_dir, "skillsHierarchy_en.csv")
+    relations_csv = os.path.join(base_dir, "skillSkillRelations_en.csv")
 
     print("Building ESCO Skill Graph...")
 
@@ -90,7 +92,8 @@ if __name__ == "__main__":
     print("Total edges:", len(graph.edges))
 
     # Save graph to JSON
-    with open("esco_skill_graph.json", "w", encoding="utf-8") as f:
+    output_path = os.path.join(base_dir, "esco_skill_graph.json")
+    with open(output_path, "w", encoding="utf-8") as f:
         json.dump(nx.node_link_data(graph), f, ensure_ascii=False, indent=2)
 
     print("Graph saved as esco_skill_graph.json")

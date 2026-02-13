@@ -68,7 +68,7 @@ const ATS = () => {
   };
 
   return (
-    <div className="h-full w-full bg-slate-50 relative overflow-y-auto overflow-x-hidden flex justify-center">
+    <div className="bg-slate-50 relative overflow-y-auto overflow-x-hidden flex justify-center">
       <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-100/50 rounded-full blur-3xl opacity-60" />
         <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-indigo-100/50 rounded-full blur-3xl opacity-60" />

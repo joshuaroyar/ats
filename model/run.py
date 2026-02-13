@@ -2,7 +2,7 @@ from core.scoring.scoring_engine import evaluate_resume_against_jd
 import json
 
 if __name__ == "__main__":
-    resume_file = "resume3.pdf"
+    resume_file = "resume.pdf"
     
     with open("jd.txt", "r", encoding="utf-8") as f:
         jd_text = f.read()

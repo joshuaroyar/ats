@@ -1,15 +1,13 @@
 import json
 import numpy as np
-import torch
 import os
 from sentence_transformers import SentenceTransformer
 from numpy.linalg import norm
 
 # Load embeddings
-base_path = os.path.dirname(os.path.abspath(__file__))
-embeddings_path = os.path.join(base_path, "../../utils/esco/skill_embeddings.json")
-
-with open(embeddings_path, "r", encoding="utf-8") as f:
+base_dir = os.path.dirname(os.path.abspath(__file__))
+path = os.path.join(base_dir, "../../utils/esco/skill_embeddings.json")
+with open(path, "r", encoding="utf-8") as f:
     SKILL_DB = json.load(f)
 
 # Convert embeddings into arrays for fast math
@@ -18,6 +16,7 @@ IDS = [s["id"] for s in SKILL_DB]
 NAMES = [s["name"] for s in SKILL_DB]
 
 # Load local embedding model (same as before)
+import torch
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model = SentenceTransformer("intfloat/e5-base", device=device)
 

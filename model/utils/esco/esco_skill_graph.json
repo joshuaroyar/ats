@@ -124759,7 +124759,7 @@
       "id": "http://data.europa.eu/esco/skill/fff74a70-4f82-4949-9c3b-b335904cf927"
     }
   ],
-  "edges": [
+  "links": [
     {
       "relation": "optional",
       "source": "http://data.europa.eu/esco/skill/00064735-8fad-454b-90c7-ed858cc993f2",

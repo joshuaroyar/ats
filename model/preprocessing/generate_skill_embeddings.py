@@ -1,11 +1,13 @@
 import json
 import torch
+import os
 from tqdm import tqdm
 from sentence_transformers import SentenceTransformer
 
 # Load the skill graph from Step 1
-GRAPH_FILE = "utils/esco/esco_skill_graph.json"
-OUTPUT_FILE = "utils/esco/skill_embeddings.json"
+base_dir = os.path.dirname(os.path.abspath(__file__))
+GRAPH_FILE = os.path.join(base_dir, "../utils/esco/esco_skill_graph.json")
+OUTPUT_FILE = os.path.join(base_dir, "../utils/esco/skill_embeddings.json")
 
 print("Loading ESCO graph...")
 with open(GRAPH_FILE, "r", encoding="utf-8") as f:

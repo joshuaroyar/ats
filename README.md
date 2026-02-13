@@ -44,12 +44,12 @@
 
 **ATS Resume Analyzer** is a modern, AI-powered web application that helps job seekers optimize their resumes for Applicant Tracking Systems. The tool analyzes uploaded resumes and provides:
 
-- **ATS Compatibility Score** - Overall rating out of 65 points
+- **ATS Compatibility Score** - Overall rating out of 100 points
 - **Detailed Score Breakdown** - Impact, Structure, Clarity, and Skill scores
 - **AI-Generated Feedback** - Actionable recommendations for improvement
 - **Side-by-Side View** - Preview your resume while reviewing the analysis
 
-Built with React and Vite for the frontend, and Python with PyTorch for the AI-powered backend, this application features a beautiful, modern UI with smooth animations and an intuitive user experience.
+Built with React and Vite for the frontend, and Python with PyTorch/spacy for the AI-powered backend, this application features a beautiful, modern UI with smooth animations and an intuitive user experience.
 
 ---
 
@@ -57,13 +57,14 @@ Built with React and Vite for the frontend, and Python with PyTorch for the AI-p
 
 ### 🚀 Core Functionality
 - **PDF Resume Upload** - Drag-and-drop or click to upload (max 5MB)
+- **Job Description Analysis** - Upload text or file for targeted scoring
 - **Real-time Analysis** - Instant AI-powered resume evaluation
 - **Comprehensive Scoring** - Multi-dimensional assessment across 4 key metrics:
-  - Impact Score (10 points)
+  - Impact Score (25 points)
   - Structure Score (20 points)
-  - Clarity Score (5 points)
-  - Skill Score (30 points)
-- **Detailed Feedback** - AI-generated actionable insights
+  - Clarity Score (10 points)
+  - Skill Score (45 points)
+- **Detailed Feedback** - Generative AI insights powered by Ollama (Llama 3.1)
 - **PDF Preview** - View your resume alongside the analysis report
 
 ### 🎨 UI/UX Features
@@ -80,31 +81,27 @@ Built with React and Vite for the frontend, and Python with PyTorch for the AI-p
 
 ### Frontend Framework
 - **React 18.2.0** - UI component library
-- **React Router DOM 6.21.3** - Client-side routing
-- **Vite 7.2.7** - Build tool and dev server
+- **React Router DOM 6.** - Client-side routing
+- **Vite 7** - Build tool and dev server
 
 ### State Management & HTTP
-- **Redux Toolkit 2.1.0** - State management (ready for scalability)
-- **Axios 1.6.5** - HTTP client for API requests
+- **Axios** - HTTP client for API requests
 
 ### Styling & UI
-- **Tailwind CSS 4.1.17** - Utility-first CSS framework
-- **Framer Motion 11.0.3** - Animation library
-- **Lucide React 0.320.0** - Icon library
-- **Custom Fonts** - Outfit (sans-serif), Goudy Bookletter 1911 (serif)
+- **Tailwind CSS 4** - Utility-first CSS framework
+- **Framer Motion** - Animation library
+- **Lucide React** - Icon library
 
 ### Backend Framework
-- **Python 3.8+** - Core programming language
-- **PyTorch 2.0+** - Deep learning framework for AI models
-- **FastAPI** - Web framework for API endpoints
-- **Ollama** - Local LLM for feedback generation
+- **Python 3.10+** - Core script language
+- **FastAPI** - Backend API server
+- **PyTorch / SentenceTransformers** - Embedding and semantic search
 
 ### AI/ML Libraries
 - **spaCy** - Natural language processing
-- **NLTK** - Text processing and analysis
-- **sentence-transformers** - Sentence embeddings for semantic matching
-- **networkx** - Graph analysis for skill relationships
-- **pdfminer/pdfplumber** - PDF text extraction
+- **Ollama** - Local LLM runner (Llama 3.1)
+- **scikit-learn** - Similarity calculations
+- **networkx** - Knowledge graph processing
 
 ### Utilities
 - **React Hot Toast 2.4.1** - Toast notifications
@@ -115,35 +112,32 @@ Built with React and Vite for the frontend, and Python with PyTorch for the AI-p
 
 ## 🚀 Getting Started
 
+The easiest way to run the application is using the provided startup script, which handles dependencies and services automatically.
+
 ### Prerequisites
 
-Ensure you have the following installed:
+- **Linux or WSL (Windows Subsystem for Linux)** (Recommended)
+- **Python 3.10+**
+- **Node.js** (v18+)
+- **Ollama** (for AI feedback) - [Installation Guide](https://ollama.com)
 
-#### Frontend
-- **Node.js** (v16 or higher)
-- **npm** or **yarn**
+### Quick Start (Recommended)
 
-#### Backend
-- **Python** (3.8 or higher)
-- **pip** (Python package manager)
-- **Ollama** (for local LLM) - [Installation Guide](https://ollama.ai/download)
-- **CUDA** (optional, for GPU acceleration)
+1.  **Make the script executable** (first time only):
+    ```bash
+    chmod +x start.sh
+    ```
 
-### Installation
+2.  **Run the application**:
+    ```bash
+    ./start.sh
+    ```
 
-#### Frontend Setup
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/joshuaroyar/ats.git
-   cd ats/frontend
-   ```
+This script will setup the Python virtual environment, install dependencies, download required AI models, and start both the backend and frontend servers.
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   # or
-   yarn install
-   ```
+### Manual Installation
+
+For detailed step-by-step instructions, including handling common errors, please refer to our [**Setup Tutorial**](docs/SETUP_TUTORIAL.md).
 
 #### Backend Setup
 1. **Navigate to model directory**
